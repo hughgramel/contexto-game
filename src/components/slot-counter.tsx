@@ -48,7 +48,7 @@ export function SlotCounter({ value, label }: SlotCounterProps) {
     const startTimeout = setTimeout(tick, 100);
 
     // Remove pop class after animation finishes
-    const popTimeout = setTimeout(() => setPopping(false), 500);
+    const popTimeout = setTimeout(() => setPopping(false), 750);
 
     // Hide the +n badge after the animation completes
     timeoutRef.current = setTimeout(() => {
@@ -64,17 +64,15 @@ export function SlotCounter({ value, label }: SlotCounterProps) {
   }, [value]);
 
   return (
-    <div
-      className={`flex items-center gap-1.5 origin-left ${popping ? "counter-pop" : ""}`}
-    >
+    <div className="flex items-center gap-1.5">
       <span className="text-black/40 text-xs">{label}</span>
       <span className="font-mono font-bold text-sm tabular-nums">
         {displayValue.toLocaleString()}
       </span>
       <span
-        className={`font-mono text-xs font-semibold text-emerald-600 transition-all duration-300 ${
+        className={`inline-block font-mono text-xs font-semibold text-emerald-600 ${
           showDelta && delta > 0
-            ? `opacity-100 ${popping ? "scale-125" : "scale-100"}`
+            ? `opacity-100 ${popping ? "counter-pop" : ""}`
             : "opacity-0 scale-75"
         }`}
       >

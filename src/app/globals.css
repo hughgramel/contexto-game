@@ -38,18 +38,21 @@ body {
   animation: smash 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
-/* Counter pop — scales up big then bounces back */
+/* Counter pop — +n badge scales up big then bounces back */
 @keyframes counter-pop {
   0% {
     transform: scale(1);
   }
-  20% {
-    transform: scale(1.35);
+  15% {
+    transform: scale(1.8);
   }
-  50% {
-    transform: scale(0.95);
+  35% {
+    transform: scale(1.7);
   }
-  70% {
+  60% {
+    transform: scale(0.9);
+  }
+  80% {
     transform: scale(1.05);
   }
   100% {
@@ -58,5 +61,5 @@ body {
 }
 
 .counter-pop {
-  animation: counter-pop 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  animation: counter-pop 0.7s cubic-bezier(0.22, 1, 0.36, 1);
 }
