@@ -1,12 +1,14 @@
 export type AppTab = {
   href: string;
   label: string;
+  icon: string;
 };
 
 export const APP_TABS: AppTab[] = [
-  { href: "/home", label: "Home" },
-  { href: "/discover", label: "Discover" },
-  { href: "/profile", label: "Profile" },
+  { href: "/home", label: "Today", icon: "home" },
+  { href: "/discover", label: "Discover", icon: "discover" },
+  { href: "/library", label: "Library", icon: "library" },
+  { href: "/profile", label: "Profile", icon: "profile" },
 ];
 
 export function getTabByHref(href: string): AppTab | undefined {
