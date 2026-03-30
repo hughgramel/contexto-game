@@ -38,134 +38,180 @@ function IconShell({ children, label }: { children: React.ReactNode; label: stri
   );
 }
 
-/** 1: Four thick bars, decreasing width */
-function Variation1() {
+function Bars({ widths, height, gap, align = "flex-start" }: { widths: number[]; height: number; gap: number; align?: "flex-start" | "center" }) {
   return (
-    <IconShell label="1 — Thick bars, 4 lines">
-      <div style={{ display: "flex", flexDirection: "column", gap: 28, alignItems: "flex-start" }}>
-        {[260, 230, 250, 180].map((w, i) => (
-          <div
-            key={i}
-            style={{
-              width: w,
-              height: 26,
-              borderRadius: 13,
-              backgroundColor: BLUE,
-            }}
-          />
-        ))}
-      </div>
-    </IconShell>
-  );
-}
-
-/** 2: Five thinner bars */
-function Variation2() {
-  return (
-    <IconShell label="2 — Thin bars, 5 lines">
-      <div style={{ display: "flex", flexDirection: "column", gap: 22, alignItems: "flex-start" }}>
-        {[250, 220, 260, 200, 160].map((w, i) => (
-          <div
-            key={i}
-            style={{
-              width: w,
-              height: 16,
-              borderRadius: 8,
-              backgroundColor: BLUE,
-            }}
-          />
-        ))}
-      </div>
-    </IconShell>
-  );
-}
-
-/** 3: Three fat bars */
-function Variation3() {
-  return (
-    <IconShell label="3 — Fat bars, 3 lines">
-      <div style={{ display: "flex", flexDirection: "column", gap: 32, alignItems: "flex-start" }}>
-        {[270, 240, 190].map((w, i) => (
-          <div
-            key={i}
-            style={{
-              width: w,
-              height: 36,
-              borderRadius: 18,
-              backgroundColor: BLUE,
-            }}
-          />
-        ))}
-      </div>
-    </IconShell>
-  );
-}
-
-/** 4: Squiggly snake lines — wavy using multiple small circles/segments */
-function WavyLine({ width, amplitude, periods, thickness }: { width: number; amplitude: number; periods: number; thickness: number }) {
-  const points = 60;
-  return (
-    <div style={{ position: "relative", width, height: amplitude * 2 + thickness }}>
-      {Array.from({ length: points }).map((_, i) => {
-        const x = (i / (points - 1)) * width;
-        const y = Math.sin((i / (points - 1)) * Math.PI * 2 * periods) * amplitude + amplitude;
-        return (
-          <div
-            key={i}
-            style={{
-              position: "absolute",
-              left: x - thickness / 2,
-              top: y,
-              width: thickness + 2,
-              height: thickness,
-              borderRadius: thickness / 2,
-              backgroundColor: BLUE,
-            }}
-          />
-        );
-      })}
+    <div style={{ display: "flex", flexDirection: "column", gap, alignItems: align }}>
+      {widths.map((w, i) => (
+        <div
+          key={i}
+          style={{
+            width: w,
+            height,
+            borderRadius: height / 2,
+            backgroundColor: BLUE,
+          }}
+        />
+      ))}
     </div>
   );
 }
 
-function Variation4() {
+// --- 3-line variations ---
+
+function V1() {
   return (
-    <IconShell label="4 — Squiggly, thick">
-      <div style={{ display: "flex", flexDirection: "column", gap: 18, alignItems: "flex-start" }}>
-        <WavyLine width={260} amplitude={12} periods={3} thickness={20} />
-        <WavyLine width={230} amplitude={12} periods={2.5} thickness={20} />
-        <WavyLine width={250} amplitude={12} periods={3} thickness={20} />
-        <WavyLine width={190} amplitude={12} periods={2} thickness={20} />
-      </div>
+    <IconShell label="A1 — 3 fat bars">
+      <Bars widths={[270, 240, 190]} height={36} gap={32} />
     </IconShell>
   );
 }
 
-/** 5: Squiggly thin, more lines */
-function Variation5() {
+function V2() {
   return (
-    <IconShell label="5 — Squiggly, thin, 5 lines">
-      <div style={{ display: "flex", flexDirection: "column", gap: 12, alignItems: "flex-start" }}>
-        <WavyLine width={260} amplitude={8} periods={3.5} thickness={12} />
-        <WavyLine width={240} amplitude={8} periods={3} thickness={12} />
-        <WavyLine width={255} amplitude={8} periods={3.5} thickness={12} />
-        <WavyLine width={220} amplitude={8} periods={2.5} thickness={12} />
-        <WavyLine width={170} amplitude={8} periods={2} thickness={12} />
-      </div>
+    <IconShell label="A2 — 3 extra-fat, wide">
+      <Bars widths={[340, 310, 260]} height={42} gap={30} />
     </IconShell>
   );
 }
 
-/** 6: Squiggly medium, gentle wave */
-function Variation6() {
+function V3() {
   return (
-    <IconShell label="6 — Gentle wave, 4 lines">
-      <div style={{ display: "flex", flexDirection: "column", gap: 24, alignItems: "flex-start" }}>
-        <WavyLine width={270} amplitude={10} periods={2} thickness={18} />
-        <WavyLine width={240} amplitude={10} periods={1.5} thickness={18} />
-        <WavyLine width={260} amplitude={10} periods={2} thickness={18} />
-        <WavyLine width={200} amplitude={10} periods={1.5} thickness={18} />
-      </div>
+    <IconShell label="A3 — 3 fat, centered">
+      <Bars widths={[340, 290, 220]} height={38} gap={30} align="center" />
+    </IconShell>
+  );
+}
+
+// --- 4-line variations ---
+
+function V4() {
+  return (
+    <IconShell label="B1 — 4 fat bars, left">
+      <Bars widths={[330, 300, 320, 250]} height={34} gap={24} />
+    </IconShell>
+  );
+}
+
+function V5() {
+  return (
+    <IconShell label="B2 — 4 extra-fat, wide">
+      <Bars widths={[360, 330, 350, 280]} height={40} gap={20} />
+    </IconShell>
+  );
+}
+
+function V6() {
+  return (
+    <IconShell label="B3 — 4 fat, centered">
+      <Bars widths={[340, 290, 320, 240]} height={36} gap={22} align="center" />
+    </IconShell>
+  );
+}
+
+function V7() {
+  return (
+    <IconShell label="B4 — 4 medium, staggered">
+      <Bars widths={[300, 340, 270, 320]} height={32} gap={24} />
+    </IconShell>
+  );
+}
+
+function V8() {
+  return (
+    <IconShell label="B5 — 4 chunky, tight">
+      <Bars widths={[350, 320, 340, 260]} height={38} gap={16} />
+    </IconShell>
+  );
+}
+
+function V9() {
+  return (
+    <IconShell label="B6 — 4 fat, descending">
+      <Bars widths={[360, 310, 260, 200]} height={36} gap={22} />
+    </IconShell>
+  );
+}
+
+function V10() {
+  return (
+    <IconShell label="B7 — 4 fat, centered descending">
+      <Bars widths={[350, 300, 250, 190]} height={36} gap={22} align="center" />
+    </IconShell>
+  );
+}
+
+function V11() {
+  return (
+    <IconShell label="B8 — 4 thicc, minimal gap">
+      <Bars widths={[370, 340, 360, 290]} height={42} gap={14} />
+    </IconShell>
+  );
+}
+
+// --- 5-line variations ---
+
+function V12() {
+  return (
+    <IconShell label="C1 — 5 bars, tight">
+      <Bars widths={[340, 310, 330, 290, 240]} height={28} gap={18} />
+    </IconShell>
+  );
+}
+
+function V13() {
+  return (
+    <IconShell label="C2 — 5 bars, wide + fat">
+      <Bars widths={[360, 330, 350, 300, 260]} height={32} gap={14} />
+    </IconShell>
+  );
+}
+
+// --- B2 sub-iterations: same widths [360, 330, 350, 280], varying thickness ---
+
+function B2_1() {
+  return (
+    <IconShell label="B2.1 — height 28">
+      <Bars widths={[360, 330, 350, 280]} height={28} gap={24} />
+    </IconShell>
+  );
+}
+
+function B2_2() {
+  return (
+    <IconShell label="B2.2 — height 34">
+      <Bars widths={[360, 330, 350, 280]} height={34} gap={22} />
+    </IconShell>
+  );
+}
+
+function B2_3() {
+  return (
+    <IconShell label="B2.3 — height 40 (original)">
+      <Bars widths={[360, 330, 350, 280]} height={40} gap={20} />
+    </IconShell>
+  );
+}
+
+function B2_4() {
+  return (
+    <IconShell label="B2.4 — height 46">
+      <Bars widths={[360, 330, 350, 280]} height={46} gap={16} />
+    </IconShell>
+  );
+}
+
+function B2_5() {
+  return (
+    <IconShell label="B2.5 — height 52">
+      <Bars widths={[360, 330, 350, 280]} height={52} gap={12} />
+    </IconShell>
+  );
+}
+
+function B2_6() {
+  return (
+    <IconShell label="B2.6 — height 58">
+      <Bars widths={[360, 330, 350, 280]} height={58} gap={8} />
     </IconShell>
   );
 }
@@ -173,17 +219,34 @@ function Variation6() {
 export default function IconsPage() {
   return (
     <div style={{ minHeight: "100vh", backgroundColor: "#f3f4f6", padding: 32 }}>
-      <h1 style={{ fontSize: 24, fontWeight: 700, marginBottom: 8 }}>Contexto — PWA Icon Variations</h1>
+      <h1 style={{ fontSize: 24, fontWeight: 700, marginBottom: 8 }}>Contexto — Fat Bar Iterations</h1>
       <p style={{ color: "#888", marginBottom: 32 }}>
-        512x512. Flat blue. Bottom: 90px shelf. All text-line variations.
+        3-line (A), 4-line (B), 5-line (C). Varying thickness, width, alignment, gap.
       </p>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 40 }}>
-        <Variation1 />
-        <Variation2 />
-        <Variation3 />
-        <Variation4 />
-        <Variation5 />
-        <Variation6 />
+        <V1 />
+        <V2 />
+        <V3 />
+        <V4 />
+        <V5 />
+        <V6 />
+        <V7 />
+        <V8 />
+        <V9 />
+        <V10 />
+        <V11 />
+        <V12 />
+        <V13 />
+      </div>
+      <h2 style={{ fontSize: 20, fontWeight: 700, marginTop: 60, marginBottom: 8 }}>B2 Sub-iterations — Line Thickness</h2>
+      <p style={{ color: "#888", marginBottom: 32 }}>Same widths [360, 330, 350, 280], thickness from 28 to 58.</p>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 40 }}>
+        <B2_1 />
+        <B2_2 />
+        <B2_3 />
+        <B2_4 />
+        <B2_5 />
+        <B2_6 />
       </div>
     </div>
   );

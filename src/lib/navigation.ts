@@ -8,6 +8,7 @@ export const APP_TABS: AppTab[] = [
   { href: "/home", label: "Today", icon: "home" },
   { href: "/discover", label: "Discover", icon: "discover" },
   { href: "/library", label: "Library", icon: "library" },
+  { href: "/dictionary", label: "Dictionary", icon: "dictionary" },
   { href: "/profile", label: "Profile", icon: "profile" },
 ];
 

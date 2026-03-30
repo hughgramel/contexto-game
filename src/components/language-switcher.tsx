@@ -8,8 +8,11 @@ import { LANGUAGES } from "@/lib/mock-data";
 
 export const LanguageSwitcher = observer(function LanguageSwitcher() {
   const [open, setOpen] = useState(false);
+  const hasHydrated = appState$.preferences.hasHydrated.get();
   const currentCode = appState$.language.get();
-  const current = LANGUAGES.find((l) => l.code === currentCode) ?? LANGUAGES[0];
+  // Use the default language until localStorage has hydrated to avoid SSR mismatch
+  const effectiveCode = hasHydrated ? currentCode : "zh";
+  const current = LANGUAGES.find((l) => l.code === effectiveCode) ?? LANGUAGES[0];
 
   return (
     <div className="relative">

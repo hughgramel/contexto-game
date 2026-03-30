@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useEffect, useRef, useCallback } from "react";
+import { use, useEffect, useRef, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { observer } from "@legendapp/state/react";
 
@@ -11,7 +11,16 @@ import {
   setReadingProgress,
   incrementReadingsDone,
 } from "@/lib/state/app-state";
+import {
+  knownWordsCount$,
+  learningWordsCount$,
+} from "@/lib/state/dictionary-state";
+import { clearSelection, clearWordTranslation } from "@/lib/state/reader-state";
 import { getArticleById } from "@/lib/mock-data";
+import { tokenizeText } from "@/lib/tokenize";
+import { usePanelState } from "@/hooks/use-panel-state";
+import { PageWords } from "@/components/reader/reader-transcript";
+import { WordPopup } from "@/components/reader/word-popup";
 import { SlotCounter } from "@/components/slot-counter";
 
 type ReaderPageProps = {
@@ -24,23 +33,44 @@ const ReaderPage = observer(function ReaderPage({ params }: ReaderPageProps) {
   const article = getArticleById(id);
 
   const progressData = appState$.readingProgress.get();
-  const stats = appState$.stats.get();
   const currentProgress = progressData[id];
   const currentPage = currentProgress?.currentPage ?? 0;
   const totalPages = article?.pages.length ?? 1;
-  const pct = Math.round(((currentPage + 1) / totalPages) * 100);
+  const pct = totalPages <= 1 ? 100 : Math.round((currentPage / (totalPages - 1)) * 100);
+
+  const knownCount = knownWordsCount$.get();
+  const learningCount = learningWordsCount$.get();
+
+  // Tokenize each page into Word arrays
+  const pageWords = useMemo(
+    () => (article ? article.pages.map((text) => tokenizeText(text)) : []),
+    [article],
+  );
+
+  // Flat word array for the panel state (uses first visible page's words for sentence lookup)
+  // Each page has independent word arrays, so panel state uses the current page's words
+  const currentPageWords = pageWords[currentPage] ?? [];
+
+  const {
+    popupMode,
+    popupAnchor,
+    wordTranslationWord,
+    translationText,
+    alreadySaved,
+    handleSave,
+    handleClose,
+  } = usePanelState(currentPageWords, id);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const pageRefs = useRef<(HTMLDivElement | null)[]>([]);
   const visitedPages = useRef(new Set<number>([0]));
 
-  // Scroll to saved page on mount (instant, no animation)
+  // Scroll to saved page on mount
   useEffect(() => {
     const savedPage = currentPage;
     if (savedPage > 0 && pageRefs.current[savedPage]) {
       pageRefs.current[savedPage]?.scrollIntoView();
     }
-    // Mark all pages up to saved as visited
     for (let i = 0; i <= savedPage; i++) {
       visitedPages.current.add(i);
     }
@@ -53,7 +83,7 @@ const ReaderPage = observer(function ReaderPage({ params }: ReaderPageProps) {
     const container = scrollRef.current;
     if (!container) return;
 
-    const observer = new IntersectionObserver(
+    const obs = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
           if (!entry.isIntersecting) continue;
@@ -74,14 +104,33 @@ const ReaderPage = observer(function ReaderPage({ params }: ReaderPageProps) {
     );
 
     pageRefs.current.forEach((el) => {
-      if (el) observer.observe(el);
+      if (el) obs.observe(el);
     });
 
-    return () => observer.disconnect();
+    return () => obs.disconnect();
   }, [id, article, totalPages]);
+
+  // Dismiss popup on significant scroll (page snap), ignore micro-scrolls from clicks
+  useEffect(() => {
+    const container = scrollRef.current;
+    if (!container) return;
+    let lastScrollTop = container.scrollTop;
+    const onScroll = () => {
+      const delta = Math.abs(container.scrollTop - lastScrollTop);
+      if (delta > 60) {
+        clearSelection();
+        clearWordTranslation();
+        lastScrollTop = container.scrollTop;
+      }
+    };
+    container.addEventListener("scroll", onScroll, { passive: true });
+    return () => container.removeEventListener("scroll", onScroll);
+  }, []);
 
   const handleFinish = useCallback(() => {
     incrementReadingsDone();
+    clearSelection();
+    clearWordTranslation();
     router.push(`/read/${id}/complete`);
   }, [router, id]);
 
@@ -99,7 +148,11 @@ const ReaderPage = observer(function ReaderPage({ params }: ReaderPageProps) {
       <div className="shrink-0 border-b border-black/10 px-4 py-3">
         <div className="flex items-center gap-3">
           <button
-            onClick={() => router.push("/home")}
+            onClick={() => {
+              clearSelection();
+              clearWordTranslation();
+              router.push("/home");
+            }}
             className="text-black/40"
           >
             <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
@@ -124,9 +177,9 @@ const ReaderPage = observer(function ReaderPage({ params }: ReaderPageProps) {
 
         {/* Stats row with slot-machine counters */}
         <div className="mt-2 flex items-center gap-4">
-          <SlotCounter value={stats.wordsRead} label="Read" />
+          <SlotCounter value={learningCount} label="Learning" />
           <div className="h-3 w-px bg-black/10" />
-          <SlotCounter value={stats.wordsKnown} label="Known" />
+          <SlotCounter value={knownCount} label="Known" />
         </div>
       </div>
 
@@ -135,7 +188,7 @@ const ReaderPage = observer(function ReaderPage({ params }: ReaderPageProps) {
         ref={scrollRef}
         className="hide-scrollbar flex-1 min-h-0 overflow-y-scroll snap-y snap-mandatory overscroll-y-contain"
       >
-        {article.pages.map((pageText, i) => (
+        {article.pages.map((_, i) => (
           <div
             key={i}
             ref={(el) => { pageRefs.current[i] = el; }}
@@ -149,9 +202,21 @@ const ReaderPage = observer(function ReaderPage({ params }: ReaderPageProps) {
               </div>
             )}
 
-            <p className="flex-1 text-xl leading-8 text-black/70">
-              {pageText}
-            </p>
+            {/* Word spans instead of plain text */}
+            <div
+              className="flex-1 text-xl leading-8"
+              style={{ touchAction: "none" }}
+              onClick={() => {
+                // Tapping empty space dismisses popup
+                clearSelection();
+                clearWordTranslation();
+              }}
+            >
+              <PageWords
+                words={pageWords[i]}
+                keyPrefix={`${id}-p${i}`}
+              />
+            </div>
 
             {/* Bottom hint / finish */}
             <div className="mt-auto pt-6 shrink-0">
@@ -174,6 +239,19 @@ const ReaderPage = observer(function ReaderPage({ params }: ReaderPageProps) {
           </div>
         ))}
       </div>
+
+      {/* Floating popup near tapped word */}
+      {popupMode && popupAnchor && (
+        <WordPopup
+          mode={popupMode}
+          anchor={popupAnchor}
+          word={wordTranslationWord}
+          translation={translationText}
+          alreadySaved={alreadySaved}
+          onSave={handleSave}
+          onClose={handleClose}
+        />
+      )}
     </div>
   );
 });

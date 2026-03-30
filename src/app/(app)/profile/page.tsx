@@ -1,104 +1,107 @@
 "use client";
 
-import { useSelector } from "@legendapp/state/react";
+import Link from "next/link";
+import { observer } from "@legendapp/state/react";
 
-import { SafeAreaShell } from "@/components/safe-area-shell";
-import { getOverviewStats } from "@/lib/state/stats-state";
-import { userState$ } from "@/lib/state/user-state";
-import { getVocabularyEntries } from "@/lib/state/vocabulary-state";
+import { appState$ } from "@/lib/state/app-state";
+import {
+  knownWordsCount$,
+  learningWordsCount$,
+} from "@/lib/state/dictionary-state";
 
-const statusMap = {
-  known: "text-emerald-300",
-  learning: "text-amber-300",
-} as const;
+const ProfilePage = observer(function ProfilePage() {
+  const stats = appState$.stats.get();
+  const knownCount = knownWordsCount$.get();
+  const learningCount = learningWordsCount$.get();
 
-const bgMap = {
-  known: "bg-emerald-500/5",
-  learning: "bg-amber-500/10",
-} as const;
-
-export default function ProfilePage() {
-  const overview = useSelector(() => getOverviewStats());
-  const profile = useSelector(() => userState$.profile.get());
-  const vocabularyEntries = useSelector(() =>
-    Object.values(getVocabularyEntries()).sort((left, right) =>
-      right.updatedAt.localeCompare(left.updatedAt),
-    ),
-  );
-
-  const stats = [
-    { label: "Words read", value: overview.wordsRead.toString() },
-    { label: "Words known", value: overview.wordsKnown.toString() },
-    { label: "Words learning", value: overview.wordsLearning.toString() },
-    { label: "Pages completed", value: overview.pagesCompleted.toString() },
+  const statItems = [
+    { label: "day streak", value: stats.dayStreak },
+    { label: "learning", value: learningCount },
+    { label: "known", value: knownCount },
+    { label: "readings done", value: stats.readingsDone },
   ];
 
   return (
-    <SafeAreaShell className="px-4 py-6 md:px-6">
-      <div className="mx-auto flex max-w-4xl flex-col gap-6">
-        <header className="space-y-2">
-          <p className="text-xs uppercase tracking-[0.35em] text-emerald-300">Profile</p>
-          <h1 className="text-3xl font-semibold text-white">{profile.displayName}</h1>
-          <p className="text-sm text-slate-400">
-            {profile.nativeLanguage} → {profile.targetLanguage} · local-first
-            state persisted in this browser.
-          </p>
-        </header>
-
-        <section className="grid gap-4 rounded-3xl border border-white/10 bg-slate-900/70 p-5 md:grid-cols-2">
-          {stats.map((entry) => (
-            <div key={entry.label} className="rounded-2xl bg-white/5 p-4">
-              <p className="text-xs uppercase tracking-[0.3em] text-slate-400">{entry.label}</p>
-              <p className="mt-2 text-3xl font-semibold text-white">{entry.value}</p>
-            </div>
-          ))}
-        </section>
-
-        <section className="space-y-4 rounded-3xl border border-white/10 bg-slate-900/70 p-5">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-white">Vocabulary snapshot</h2>
-            <span className="text-xs uppercase tracking-[0.3em] text-slate-400">
-              {vocabularyEntries.length} tracked
-            </span>
-          </div>
-          {vocabularyEntries.length === 0 ? (
-            <p className="text-sm text-slate-400">
-              No tracked words yet. Unknown words stay implicit until you click
-              them in the reader.
-            </p>
-          ) : (
-            <div className="grid gap-3 md:grid-cols-2">
-              {vocabularyEntries.map((entry) => (
-                <div
-                  key={entry.normalized}
-                  className={`rounded-2xl border border-white/5 px-4 py-3 ${bgMap[entry.status]}`}
-                >
-                  <p className="text-sm font-semibold text-white">
-                    {entry.surfaceForms[0] ?? entry.normalized}
-                  </p>
-                  <p className={`text-xs uppercase tracking-[0.3em] ${statusMap[entry.status]}`}>
-                    {entry.status}
-                  </p>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
-
-        <section className="space-y-2 rounded-3xl border border-white/10 bg-slate-900/70 p-5">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-white">Local data</h2>
-            <span className="rounded-full border border-white/10 px-3 py-1 text-xs uppercase tracking-[0.35em] text-slate-300">
-              Browser local
-            </span>
-          </div>
-          <p className="text-sm text-slate-400">
-            Media metadata, vocabulary, reader progress, and stats are persisted
-            locally. Media files and parsed documents live in IndexedDB until
-            Supabase storage is added later.
-          </p>
-        </section>
+    <section className="flex flex-col">
+      <div className="border-b border-black/10 px-4 py-4">
+        <h1 className="text-xl font-bold">Profile</h1>
       </div>
-    </SafeAreaShell>
+
+      <div className="space-y-6 p-4">
+        <div className="flex items-center gap-4">
+          <div className="flex h-14 w-14 items-center justify-center border border-black/10 text-lg font-bold">
+            H
+          </div>
+          <div>
+            <p className="text-lg font-semibold">Hugh Gramelspacher</p>
+            <p className="text-xs text-black/40">Since 3/18/2026</p>
+          </div>
+        </div>
+
+        <button className="w-full border border-black/10 px-4 py-2.5 text-sm font-medium">
+          Settings
+        </button>
+
+        <div>
+          <h2 className="mb-3 text-xs font-semibold uppercase tracking-widest text-black/40">Overview</h2>
+          <div className="grid grid-cols-2 gap-3">
+            {statItems.map((item) => (
+              <div key={item.label} className="border border-black/10 p-4">
+                <p className="font-mono text-2xl font-bold">{item.value}</p>
+                <p className="mt-1 text-xs text-black/40">{item.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* History link */}
+        <Link
+          href="/history"
+          className="flex items-center justify-between border border-black/10 px-4 py-4"
+        >
+          <div className="flex items-center gap-3">
+            <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="text-black/60">
+              <circle cx="12" cy="12" r="10" />
+              <polyline points="12 6 12 12 16 14" />
+            </svg>
+            <div>
+              <p className="text-sm font-semibold">Your Reads</p>
+              <p className="text-xs text-black/40">
+                {stats.readingsDone} reading{stats.readingsDone !== 1 ? "s" : ""} done
+              </p>
+            </div>
+          </div>
+          <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="text-black/30">
+            <polyline points="9 18 15 12 9 6" />
+          </svg>
+        </Link>
+
+        {/* Dictionary link */}
+        <Link
+          href="/dictionary"
+          className="flex items-center justify-between border border-black/10 px-4 py-4"
+        >
+          <div className="flex items-center gap-3">
+            <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="text-black/60">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+              <line x1="8" y1="7" x2="16" y2="7" />
+              <line x1="8" y1="11" x2="13" y2="11" />
+            </svg>
+            <div>
+              <p className="text-sm font-semibold">Dictionary</p>
+              <p className="text-xs text-black/40">
+                {learningCount} learning &middot; {knownCount} known
+              </p>
+            </div>
+          </div>
+          <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="text-black/30">
+            <polyline points="9 18 15 12 9 6" />
+          </svg>
+        </Link>
+      </div>
+    </section>
   );
-}
+});
+
+export default ProfilePage;
