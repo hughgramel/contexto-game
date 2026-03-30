@@ -10,6 +10,7 @@ type PopupMode = "word" | "sentence";
 interface WordPopupProps {
   mode: PopupMode;
   anchor: PopupAnchor;
+  lang: string;
   word?: Word | null;
   translation?: string;
   alreadySaved?: boolean;
@@ -72,6 +73,7 @@ function getPopupStyle(anchor: PopupAnchor): React.CSSProperties {
 const WordPopup = observer(function WordPopup({
   mode,
   anchor,
+  lang,
   word,
   translation,
   alreadySaved,
@@ -80,7 +82,7 @@ const WordPopup = observer(function WordPopup({
 }: WordPopupProps) {
   const isKnown =
     mode === "word" && word
-      ? dictionary$[word.targetWord].get() === "known"
+      ? dictionary$[lang]?.[word.targetWord]?.get() === "known"
       : false;
   const isSaved = mode === "sentence" && alreadySaved;
 

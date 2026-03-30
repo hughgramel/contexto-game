@@ -23,6 +23,7 @@ function buildTranscriptElements(
   range: { start: number; end: number } | null,
   handlePointerDown: (index: number, rect: DOMRect) => void,
   keyPrefix: string,
+  lang: string,
 ): React.ReactNode[] {
   const elements: React.ReactNode[] = [];
   let i = 0;
@@ -44,6 +45,7 @@ function buildTranscriptElements(
             word={word}
             index={i}
             isSelected={true}
+            lang={lang}
             onPointerDown={handlePointerDown}
           />,
         );
@@ -90,6 +92,7 @@ function buildTranscriptElements(
           word={word}
           index={i}
           isSelected={false}
+          lang={lang}
           onPointerDown={handlePointerDown}
         />,
       );
@@ -118,16 +121,18 @@ function buildTranscriptElements(
 export const PageWords = observer(function PageWords({
   words,
   keyPrefix,
+  lang,
 }: {
   words: Word[];
   keyPrefix: string;
+  lang: string;
 }) {
   const range = selectedRange$.get();
-  const { handlePointerDown } = useDragToSelect(words);
+  const { handlePointerDown } = useDragToSelect(words, lang);
 
   const elements = useMemo(
-    () => buildTranscriptElements(words, range, handlePointerDown, keyPrefix),
-    [words, range, handlePointerDown, keyPrefix],
+    () => buildTranscriptElements(words, range, handlePointerDown, keyPrefix, lang),
+    [words, range, handlePointerDown, keyPrefix, lang],
   );
 
   return <>{elements}</>;

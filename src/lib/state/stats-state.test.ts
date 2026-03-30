@@ -9,6 +9,8 @@ import {
 } from "@/lib/state/stats-state";
 import { resetVocabularyState, setWordKnown, setWordLearning } from "@/lib/state/vocabulary-state";
 
+const LANG = "zh";
+
 describe("stats state", () => {
   beforeEach(() => {
     localStorage.clear();
@@ -30,7 +32,7 @@ describe("stats state", () => {
     });
 
     const snapshot = getPageReadSnapshot("sample-text", "page-0");
-    const overview = getOverviewStats();
+    const overview = getOverviewStats(LANG);
 
     expect(snapshot?.gainedKnownWords).toBe(2);
     expect(overview.wordsRead).toBe(12);
@@ -38,11 +40,11 @@ describe("stats state", () => {
   });
 
   it("combines vocabulary counts with media comprehension totals", () => {
-    setWordKnown("aurora", "Aurora");
-    setWordLearning("tower", "Tower");
+    setWordKnown(LANG, "aurora", "Aurora");
+    setWordLearning(LANG, "tower", "Tower");
     syncMediaComprehension("sample-text", 4, 10, 50);
 
-    const overview = getOverviewStats();
+    const overview = getOverviewStats(LANG);
     expect(overview.wordsKnown).toBe(1);
     expect(overview.wordsLearning).toBe(1);
   });

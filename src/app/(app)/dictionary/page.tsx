@@ -4,11 +4,12 @@ import { useState } from "react";
 import Link from "next/link";
 import { observer } from "@legendapp/state/react";
 
+import { appState$ } from "@/lib/state/app-state";
 import {
   dictionary$,
   savedSentences$,
-  knownWordsCount$,
-  learningWordsCount$,
+  knownWordsCount,
+  learningWordsCount,
   rotateWordStatus,
   removeWord,
   removeSentence,
@@ -24,10 +25,11 @@ const DictionaryPage = observer(function DictionaryPage() {
   const [search, setSearch] = useState("");
   const [showSearch, setShowSearch] = useState(false);
 
-  const dict = dictionary$.get();
+  const lang = appState$.language.get();
+  const dict = dictionary$[lang].get() ?? {};
   const sentences = savedSentences$.get();
-  const knownCount = knownWordsCount$.get();
-  const learningCount = learningWordsCount$.get();
+  const knownCount = knownWordsCount(lang);
+  const learningCount = learningWordsCount(lang);
 
   const allWords = Object.entries(dict) as [string, WordStatus][];
   const filteredWords = allWords
@@ -209,7 +211,7 @@ const DictionaryPage = observer(function DictionaryPage() {
               </div>
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => rotateWordStatus(word)}
+                  onClick={() => rotateWordStatus(lang, word)}
                   className={`px-2 py-1 text-[10px] font-semibold uppercase tracking-wide rounded ${
                     status === "known"
                       ? "bg-emerald-100 text-emerald-700"
@@ -219,7 +221,7 @@ const DictionaryPage = observer(function DictionaryPage() {
                   {status}
                 </button>
                 <button
-                  onClick={() => removeWord(word)}
+                  onClick={() => removeWord(lang, word)}
                   className="text-black/20 hover:text-black/50 transition-colors"
                 >
                   <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">

@@ -24,7 +24,7 @@ import { dictionary$, setWordStatus } from "@/lib/state/dictionary-state";
 /** Hold duration (ms) before switching from tap mode to drag mode. */
 const HOLD_THRESHOLD_MS = 200;
 
-export function useDragToSelect(words: Word[] | undefined) {
+export function useDragToSelect(words: Word[] | undefined, lang: string) {
   const isDragging = useRef(false);
   const dragStart = useRef<number | null>(null);
   const didDrag = useRef(false);
@@ -45,9 +45,9 @@ export function useDragToSelect(words: Word[] | undefined) {
 
       clearSelection();
       // Auto-promote unknown words to "learning" on first interaction
-      const status = dictionary$[word.targetWord].get();
+      const status = dictionary$[lang]?.[word.targetWord]?.get();
       if (!status) {
-        setWordStatus(word.targetWord, "learning");
+        setWordStatus(lang, word.targetWord, "learning");
       }
       wordTranslationWord$.set(word);
       // Position popup near the tapped word
@@ -63,7 +63,7 @@ export function useDragToSelect(words: Word[] | undefined) {
         });
       }
     },
-    [words],
+    [words, lang],
   );
 
   /**

@@ -4,7 +4,7 @@ import { getVocabularyEntries } from "@/lib/state/vocabulary-state";
 
 export function analyzeWordCounts(
   wordCounts: Record<string, number>,
-  entries: Record<string, WordEntry> = getVocabularyEntries(),
+  entries: Record<string, WordEntry>,
 ): ComprehensionAnalysis {
   let totalTokens = 0;
   let knownTokens = 0;
@@ -33,7 +33,8 @@ export function analyzeWordCounts(
 
 export function analyzeDocumentComprehension(
   document: ReaderDocument,
-  entries: Record<string, WordEntry> = getVocabularyEntries(),
+  lang: string,
+  entries: Record<string, WordEntry> = getVocabularyEntries(lang),
 ): ComprehensionAnalysis {
   return analyzeWordCounts(document.frequencyByWord, entries);
 }

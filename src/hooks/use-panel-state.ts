@@ -46,7 +46,7 @@ function derivePopupMode(): PopupMode | null {
   return null;
 }
 
-export function usePanelState(words: Word[], articleId: string): PanelState {
+export function usePanelState(words: Word[], articleId: string, lang: string): PanelState {
   const wordTranslationWord = wordTranslationWord$.get();
   const range = selectedRange$.get();
   const popupAnchor = wordPopupAnchor$.get();
@@ -87,14 +87,14 @@ export function usePanelState(words: Word[], articleId: string): PanelState {
         }
       }
     } else if (mode === "word" && currentWord) {
-      const currentStatus = dictionary$[currentWord.targetWord].get();
+      const currentStatus = dictionary$[lang]?.[currentWord.targetWord]?.get();
       if (currentStatus === "known") {
-        removeWord(currentWord.targetWord);
+        removeWord(lang, currentWord.targetWord);
       } else {
-        setWordStatus(currentWord.targetWord, "known");
+        setWordStatus(lang, currentWord.targetWord, "known");
       }
     }
-  }, [articleId, words]);
+  }, [articleId, words, lang]);
 
   const handleClose = useCallback(() => {
     clearWordTranslation();

@@ -8,6 +8,7 @@ type PanelMode = "word" | "sentence";
 
 interface BottomPanelProps {
   mode: PanelMode;
+  lang: string;
   word?: Word | null;
   translation?: string;
   alreadySaved?: boolean;
@@ -43,6 +44,7 @@ function BookmarkIcon({ filled }: { filled: boolean }) {
 
 const BottomPanel = observer(function BottomPanel({
   mode,
+  lang,
   word,
   translation,
   alreadySaved,
@@ -52,7 +54,7 @@ const BottomPanel = observer(function BottomPanel({
   const isSaved = mode === "sentence" && alreadySaved;
   const isKnown =
     mode === "word" && word
-      ? dictionary$[word.targetWord].get() === "known"
+      ? dictionary$[lang]?.[word.targetWord]?.get() === "known"
       : false;
 
   if (mode === "word" && word) {

@@ -29,14 +29,16 @@ export const WordSpan = observer(function WordSpan({
   word,
   isSelected,
   index,
+  lang,
   onPointerDown,
 }: {
   word: Word;
   isSelected: boolean;
   index: number;
+  lang: string;
   onPointerDown: (index: number, rect: DOMRect) => void;
 }) {
-  const status = dictionary$[word.targetWord].get();
+  const status = dictionary$[lang]?.[word.targetWord]?.get();
 
   const bg = isSelected
     ? "bg-transparent"

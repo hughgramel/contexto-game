@@ -6,6 +6,7 @@ import {
   analyzeWordCounts,
 } from "@/lib/analysis/comprehension";
 import {
+  getVocabularyEntries,
   resetVocabularyState,
   setWordKnown,
   setWordLearning,
@@ -14,14 +15,17 @@ import {
 describe("comprehension analysis", () => {
   it("counts only known words toward comprehension percent", () => {
     resetVocabularyState();
-    setWordKnown("aurora", "Aurora");
-    setWordLearning("tower", "Tower");
+    setWordKnown("zh", "aurora", "Aurora");
+    setWordLearning("zh", "tower", "Tower");
 
-    const analysis = analyzeWordCounts({
-      aurora: 2,
-      tower: 2,
-      river: 1,
-    });
+    const analysis = analyzeWordCounts(
+      {
+        aurora: 2,
+        tower: 2,
+        river: 1,
+      },
+      getVocabularyEntries("zh"),
+    );
 
     expect(analysis.totalTokens).toBe(5);
     expect(analysis.knownTokens).toBe(2);
@@ -32,11 +36,11 @@ describe("comprehension analysis", () => {
 
   it("recomputes whole-media comprehension from the saved frequency map", () => {
     resetVocabularyState();
-    setWordKnown("tower", "Tower");
-    setWordKnown("gardens", "gardens");
+    setWordKnown("zh", "tower", "Tower");
+    setWordKnown("zh", "gardens", "gardens");
 
     const document = createSampleDocument();
-    const analysis = analyzeDocumentComprehension(document);
+    const analysis = analyzeDocumentComprehension(document, "zh");
 
     expect(analysis.totalTokens).toBe(document.totalWordTokens);
     expect(analysis.knownTokens).toBe(

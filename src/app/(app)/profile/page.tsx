@@ -5,14 +5,15 @@ import { observer } from "@legendapp/state/react";
 
 import { appState$ } from "@/lib/state/app-state";
 import {
-  knownWordsCount$,
-  learningWordsCount$,
+  knownWordsCount,
+  learningWordsCount,
 } from "@/lib/state/dictionary-state";
 
 const ProfilePage = observer(function ProfilePage() {
   const stats = appState$.stats.get();
-  const knownCount = knownWordsCount$.get();
-  const learningCount = learningWordsCount$.get();
+  const lang = appState$.language.get();
+  const knownCount = knownWordsCount(lang);
+  const learningCount = learningWordsCount(lang);
 
   const statItems = [
     { label: "day streak", value: stats.dayStreak },

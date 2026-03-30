@@ -18,6 +18,8 @@ import {
 import { getPageReadSnapshot, getOverviewStats, resetStatsState } from "@/lib/state/stats-state";
 import { getWordStatus, resetVocabularyState } from "@/lib/state/vocabulary-state";
 
+const LANG = "zh";
+
 describe("reader state", () => {
   beforeEach(() => {
     localStorage.clear();
@@ -54,7 +56,7 @@ describe("reader state", () => {
     openWordModalForToken(document, token.id);
 
     expect(readerUiState$.wordModal.get()?.tokenId).toBe(token.id);
-    expect(getWordStatus(token.normalized)).toBe("learning");
+    expect(getWordStatus(LANG, token.normalized)).toBe("learning");
   });
 
   it("marking known closes the modal and updates known progress for the page", () => {
@@ -72,7 +74,7 @@ describe("reader state", () => {
 
     markActiveWordKnown(document);
 
-    expect(getWordStatus(token.normalized)).toBe("known");
+    expect(getWordStatus(LANG, token.normalized)).toBe("known");
     expect(readerUiState$.wordModal.get()).toBeNull();
     expect(readerUiState$.knownAtPageEnd.get()).toBeGreaterThan(knownAtStart);
   });
@@ -94,7 +96,7 @@ describe("reader state", () => {
 
     const progress = getReaderProgress(document.mediaId);
     const snapshot = getPageReadSnapshot(document.mediaId, document.pages[0]!.id);
-    const overview = getOverviewStats();
+    const overview = getOverviewStats(LANG);
 
     expect(readerUiState$.activePageIndex.get()).toBe(1);
     expect(progress?.pageIndex).toBe(1);

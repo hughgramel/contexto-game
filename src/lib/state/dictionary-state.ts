@@ -1,4 +1,4 @@
-import { batch, observable, computed } from "@legendapp/state";
+import { batch, observable } from "@legendapp/state";
 import { persistObservable } from "@legendapp/state/persist";
 import { ObservablePersistLocalStorage } from "@legendapp/state/persist-plugins/local-storage";
 
@@ -14,53 +14,54 @@ ensureLocalPersistenceConfigured();
 export type WordStatus = "known" | "learning";
 
 /**
- * Per-word learning status. Keys are normalized target-language words.
- * Words absent from the map are considered "unknown" (never tapped).
+ * Language-keyed vocabulary dictionary.
+ * Shape: { [langCode]: { [normalizedWord]: WordStatus } }
+ * Words absent from a language map are considered "unknown" (never tapped).
  */
-export const dictionary$ = observable<Record<string, WordStatus>>({});
+export const dictionary$ = observable<Record<string, Record<string, WordStatus>>>({});
 
 persistObservable(dictionary$, {
   local: "contexto-dictionary",
   pluginLocal: ObservablePersistLocalStorage,
 });
 
-/** Number of words the user has marked as "known". */
-export const knownWordsCount$ = computed(() => {
-  const dict = dictionary$.get();
+/** Number of words marked "known" in the given language. */
+export function knownWordsCount(lang: string): number {
+  const dict = dictionary$[lang].get() ?? {};
   return Object.values(dict).filter((s) => s === "known").length;
-});
+}
 
-/** Number of words the user has marked as "learning". */
-export const learningWordsCount$ = computed(() => {
-  const dict = dictionary$.get();
+/** Number of words marked "learning" in the given language. */
+export function learningWordsCount(lang: string): number {
+  const dict = dictionary$[lang].get() ?? {};
   return Object.values(dict).filter((s) => s === "learning").length;
-});
+}
 
-export function setWordStatus(word: string, status: WordStatus): void {
+export function setWordStatus(lang: string, word: string, status: WordStatus): void {
   batch(() => {
-    dictionary$[word].set(status);
+    dictionary$[lang][word].set(status);
   });
 }
 
-export function removeWord(word: string): void {
+export function removeWord(lang: string, word: string): void {
   batch(() => {
-    dictionary$[word].delete();
+    dictionary$[lang][word].delete();
   });
 }
 
-export function getWordStatus(word: string): WordStatus | undefined {
-  return dictionary$[word].get();
+export function getWordStatus(lang: string, word: string): WordStatus | undefined {
+  return dictionary$[lang]?.[word]?.get();
 }
 
-export function rotateWordStatus(word: string): void {
+export function rotateWordStatus(lang: string, word: string): void {
   batch(() => {
-    const current = dictionary$[word].get();
+    const current = dictionary$[lang]?.[word]?.get();
     if (!current) {
-      dictionary$[word].set("learning");
+      dictionary$[lang][word].set("learning");
     } else if (current === "learning") {
-      dictionary$[word].set("known");
+      dictionary$[lang][word].set("known");
     } else {
-      dictionary$[word].delete();
+      dictionary$[lang][word].delete();
     }
   });
 }

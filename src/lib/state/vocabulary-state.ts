@@ -7,8 +7,12 @@ import { ensureLocalPersistenceConfigured } from "./persistence";
 
 export const VOCABULARY_PERSIST_KEY = "contexto-vocabulary-state";
 
+/**
+ * Language-keyed vocabulary state.
+ * Shape: { entries: { [langCode]: { [normalizedWord]: WordEntry } } }
+ */
 export type VocabularyState = {
-  entries: Record<string, WordEntry>;
+  entries: Record<string, Record<string, WordEntry>>;
 };
 
 export function createInitialVocabularyState(): VocabularyState {
@@ -37,22 +41,22 @@ export function resetVocabularyState(): void {
   vocabularyState$.set(createInitialVocabularyState());
 }
 
-export function getVocabularyEntries(): Record<string, WordEntry> {
-  return vocabularyState$.entries.get();
+export function getVocabularyEntries(lang: string): Record<string, WordEntry> {
+  return vocabularyState$.entries[lang].get() ?? {};
 }
 
-export function getWordStatus(normalized: string): WordEntry["status"] | "unknown" {
-  return vocabularyState$.entries[normalized].status.get() ?? "unknown";
+export function getWordStatus(lang: string, normalized: string): WordEntry["status"] | "unknown" {
+  return vocabularyState$.entries[lang]?.[normalized]?.status.get() ?? "unknown";
 }
 
-export function setWordLearning(normalized: string, surface?: string): void {
-  const existing = vocabularyState$.entries[normalized].get();
+export function setWordLearning(lang: string, normalized: string, surface?: string): void {
+  const existing = vocabularyState$.entries[lang]?.[normalized]?.get();
 
   if (existing?.status === "known") {
     return;
   }
 
-  vocabularyState$.entries[normalized].set({
+  vocabularyState$.entries[lang][normalized].set({
     normalized,
     status: "learning",
     surfaceForms: uniqueSurfaceForms(existing?.surfaceForms ?? [], surface),
@@ -60,10 +64,10 @@ export function setWordLearning(normalized: string, surface?: string): void {
   });
 }
 
-export function setWordKnown(normalized: string, surface?: string): void {
-  const existing = vocabularyState$.entries[normalized].get();
+export function setWordKnown(lang: string, normalized: string, surface?: string): void {
+  const existing = vocabularyState$.entries[lang]?.[normalized]?.get();
 
-  vocabularyState$.entries[normalized].set({
+  vocabularyState$.entries[lang][normalized].set({
     normalized,
     status: "known",
     surfaceForms: uniqueSurfaceForms(existing?.surfaceForms ?? [], surface),
@@ -71,18 +75,18 @@ export function setWordKnown(normalized: string, surface?: string): void {
   });
 }
 
-export function removeTrackedWord(normalized: string): void {
-  vocabularyState$.entries[normalized].delete();
+export function removeTrackedWord(lang: string, normalized: string): void {
+  vocabularyState$.entries[lang][normalized].delete();
 }
 
-export function getKnownWordCount(): number {
-  return Object.values(getVocabularyEntries()).filter(
+export function getKnownWordCount(lang: string): number {
+  return Object.values(getVocabularyEntries(lang)).filter(
     (entry) => entry.status === "known",
   ).length;
 }
 
-export function getLearningWordCount(): number {
-  return Object.values(getVocabularyEntries()).filter(
+export function getLearningWordCount(lang: string): number {
+  return Object.values(getVocabularyEntries(lang)).filter(
     (entry) => entry.status === "learning",
   ).length;
 }

@@ -100,7 +100,7 @@ export function getMediaStats(mediaId: string): MediaStats | undefined {
   return statsState$.mediaStatsById[mediaId].get();
 }
 
-export function getOverviewStats(): {
+export function getOverviewStats(lang: string): {
   wordsRead: number;
   wordsKnown: number;
   wordsLearning: number;
@@ -108,8 +108,8 @@ export function getOverviewStats(): {
 } {
   return {
     wordsRead: statsState$.totalWordsRead.get(),
-    wordsKnown: getKnownWordCount(),
-    wordsLearning: getLearningWordCount(),
+    wordsKnown: getKnownWordCount(lang),
+    wordsLearning: getLearningWordCount(lang),
     pagesCompleted: Object.keys(statsState$.pageSnapshotsById.get()).length,
   };
 }

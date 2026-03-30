@@ -27,6 +27,7 @@ const ReaderPage = observer(function ReaderPage({ params }: ReaderPageProps) {
   const { id } = use(params);
   const router = useRouter();
   const article = getArticleById(id);
+  const lang = appState$.language.get();
 
   const progressData = appState$.readingProgress.get();
   const currentProgress = progressData[id];
@@ -54,7 +55,7 @@ const ReaderPage = observer(function ReaderPage({ params }: ReaderPageProps) {
     alreadySaved,
     handleSave,
     handleClose,
-  } = usePanelState(currentPageWords, id);
+  } = usePanelState(currentPageWords, id, lang);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const pageRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -210,6 +211,7 @@ const ReaderPage = observer(function ReaderPage({ params }: ReaderPageProps) {
               <PageWords
                 words={pageWords[i]}
                 keyPrefix={`${id}-p${i}`}
+                lang={lang}
               />
             </div>
 
@@ -240,6 +242,7 @@ const ReaderPage = observer(function ReaderPage({ params }: ReaderPageProps) {
         <WordPopup
           mode={popupMode}
           anchor={popupAnchor}
+          lang={lang}
           word={wordTranslationWord}
           translation={translationText}
           alreadySaved={alreadySaved}
