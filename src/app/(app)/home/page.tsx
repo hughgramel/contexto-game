@@ -1,71 +1,86 @@
-import { OnboardingStatus } from "@/components/onboarding-status";
+"use client";
 
-export default function HomePage() {
+import Link from "next/link";
+import { observer } from "@legendapp/state/react";
+
+import { LanguageSwitcher } from "@/components/language-switcher";
+import { StatsBar } from "@/components/stats-bar";
+import { appState$ } from "@/lib/state/app-state";
+import { MOCK_ARTICLES } from "@/lib/mock-data";
+
+const HomePage = observer(function HomePage() {
+  const progress = appState$.readingProgress.get();
+  const currentArticle = MOCK_ARTICLES[0];
+  const articleProgress = progress[currentArticle.id];
+  const pct = articleProgress
+    ? Math.round((articleProgress.currentPage / articleProgress.totalPages) * 100)
+    : 0;
+
   return (
-    <section className="space-y-6">
-      <header className="space-y-2">
-        <p className="text-sm font-medium text-slate-500">Overview</p>
-        <h1 className="text-3xl font-semibold tracking-tight text-slate-900">
-          Home
-        </h1>
-        <p className="max-w-2xl text-sm leading-6 text-slate-600">
-          This prototype keeps the product local-first while validating the app
-          shell, navigation, and onboarding state behavior.
-        </p>
-      </header>
+    <section className="flex flex-col">
+      <div className="flex items-center justify-between border-b border-black/10 px-4 py-3">
+        <LanguageSwitcher />
+        <StatsBar />
+      </div>
 
-      <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-slate-900">
-            Scaffold status
-          </h2>
-          <p className="mt-2 text-sm leading-6 text-slate-600">
-            The current build is intentionally narrow: route-backed tabs,
-            local-only onboarding flags, and just enough chrome to feel like an
-            app instead of raw placeholders.
-          </p>
+      <div className="space-y-6 p-4">
+        <div>
+          <p className="text-xs text-black/40">This week: Mar 30 – Apr 5</p>
+          <h1 className="mt-1 text-xl font-bold">Today</h1>
+        </div>
 
-          <div className="mt-6 grid gap-3 sm:grid-cols-2">
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <p className="text-sm font-medium text-slate-900">Navigation</p>
-              <p className="mt-1 text-sm text-slate-600">
-                Sidebar on desktop and bottom nav on mobile.
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <p className="text-sm font-medium text-slate-900">State</p>
-              <p className="mt-1 text-sm text-slate-600">
-                Legend State with persisted onboarding metadata.
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <p className="text-sm font-medium text-slate-900">Testing</p>
-              <p className="mt-1 text-sm text-slate-600">
-                Shell and state behavior verified through dev tooling.
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <p className="text-sm font-medium text-slate-900">Backend</p>
-              <p className="mt-1 text-sm text-slate-600">
-                Deferred until the local interaction model feels correct.
-              </p>
-            </div>
+        <Link
+          href={`/read/${currentArticle.id}`}
+          className="block border border-black/10 p-4"
+        >
+          <div className="mb-3 flex items-center gap-2">
+            <span className="border border-black/10 px-2 py-0.5 text-xs text-black/50">
+              {currentArticle.category}
+            </span>
+            <span className="text-xs text-black/30">{currentArticle.date}</span>
           </div>
-        </section>
+          <h2 className="text-lg font-bold">{currentArticle.title}</h2>
+          <p className="mt-1 text-sm text-black/50">{currentArticle.subtitle}</p>
+          <div className="mt-4 flex items-center justify-between">
+            <span className="bg-black px-4 py-2 text-sm font-semibold text-white">
+              {pct > 0 ? "Resume" : "Start Reading"}
+            </span>
+            <span className="font-mono text-sm text-black/40">{pct}%</span>
+          </div>
+        </Link>
 
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-slate-900">
-            Onboarding state
+        <div>
+          <h2 className="mb-3 text-xs font-semibold uppercase tracking-widest text-black/40">
+            Continue Reading
           </h2>
-          <p className="mt-2 mb-4 text-sm leading-6 text-slate-600">
-            Current locally persisted onboarding metadata.
-          </p>
-          <OnboardingStatus />
-        </section>
+          <div className="space-y-2">
+            {MOCK_ARTICLES.slice(1, 4).map((article) => {
+              const ap = progress[article.id];
+              const apPct = ap ? Math.round((ap.currentPage / ap.totalPages) * 100) : 0;
+
+              return (
+                <Link
+                  key={article.id}
+                  href={`/read/${article.id}`}
+                  className="flex items-center justify-between border border-black/10 px-4 py-3"
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium">{article.title}</p>
+                    <p className="mt-0.5 text-xs text-black/40">
+                      {article.category} · {article.wordsCount} words
+                    </p>
+                  </div>
+                  <span className="ml-3 shrink-0 font-mono text-xs text-black/40">
+                    {apPct}%
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
       </div>
     </section>
   );
-}
+});
+
+export default HomePage;

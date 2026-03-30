@@ -1,54 +1,70 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+
+import { CATEGORIES, MOCK_ARTICLES, getArticlesByCategory } from "@/lib/mock-data";
+
 export default function DiscoverPage() {
+  const [activeCategory, setActiveCategory] = useState("Latest");
+  const articles = getArticlesByCategory(activeCategory);
+
   return (
-    <section className="space-y-6">
-      <header className="space-y-2">
-        <p className="text-sm font-medium text-slate-500">Explore</p>
-        <h1 className="text-3xl font-semibold tracking-tight text-slate-900">
-          Discover
-        </h1>
-        <p className="max-w-2xl text-sm leading-6 text-slate-600">
-          Placeholder content cards make the tab feel closer to a real product
-          while keeping the implementation intentionally light.
+    <section className="flex flex-col">
+      <div className="border-b border-black/10 px-4 py-3">
+        <div className="flex items-center justify-between">
+          <h1 className="text-xl font-bold">Discover</h1>
+          <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+        </div>
+
+        <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+          {CATEGORIES.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setActiveCategory(cat)}
+              className={[
+                "shrink-0 border px-3 py-1.5 text-xs font-medium",
+                activeCategory === cat
+                  ? "border-black bg-black text-white"
+                  : "border-black/10 text-black/40",
+              ].join(" ")}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="px-4 pt-3">
+        <p className="text-xs text-black/40">
+          {articles.length} {articles.length === 1 ? "article" : "articles"}
         </p>
-      </header>
+      </div>
 
-      <div className="grid gap-4 lg:grid-cols-3">
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-            Daily clue
-          </p>
-          <h2 className="mt-3 text-lg font-semibold text-slate-900">
-            Featured challenge
-          </h2>
-          <p className="mt-2 text-sm leading-6 text-slate-600">
-            A slot for the primary puzzle or entry point users should try next.
-          </p>
-        </section>
-
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-            Progress
-          </p>
-          <h2 className="mt-3 text-lg font-semibold text-slate-900">
-            Continue where you left off
-          </h2>
-          <p className="mt-2 text-sm leading-6 text-slate-600">
-            A future section for unfinished games, recent rounds, or saved
-            context.
-          </p>
-        </section>
-
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-            Coming next
-          </p>
-          <h2 className="mt-3 text-lg font-semibold text-slate-900">
-            Recommendations
-          </h2>
-          <p className="mt-2 text-sm leading-6 text-slate-600">
-            A future area for suggested prompts, topics, or social discovery.
-          </p>
-        </section>
+      <div className="grid grid-cols-2 gap-3 p-4">
+        {articles.map((article) => (
+          <Link
+            key={article.id}
+            href={`/read/${article.id}`}
+            className="flex flex-col border border-black/10"
+          >
+            <div className="flex h-28 items-center justify-center bg-black/5">
+              <span className="text-2xl text-black/20">{article.title.charAt(0)}</span>
+            </div>
+            <div className="flex flex-1 flex-col p-3">
+              <p className="line-clamp-2 text-sm font-medium leading-tight">
+                {article.title}
+              </p>
+              <div className="mt-auto flex items-center justify-between pt-2">
+                <span className="text-[10px] text-black/40">{article.category}</span>
+                <span className="text-[10px] text-black/30">{article.date}</span>
+              </div>
+            </div>
+          </Link>
+        ))}
       </div>
     </section>
   );

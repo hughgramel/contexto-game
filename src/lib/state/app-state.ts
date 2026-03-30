@@ -14,6 +14,14 @@ export type AppState = {
   preferences: {
     hasHydrated: boolean;
   };
+  language: string;
+  stats: {
+    wordsRead: number;
+    wordsKnown: number;
+    readingsDone: number;
+    dayStreak: number;
+  };
+  readingProgress: Record<string, { currentPage: number; totalPages: number }>;
 };
 
 export function createInitialAppState(): AppState {
@@ -26,6 +34,14 @@ export function createInitialAppState(): AppState {
     preferences: {
       hasHydrated: false,
     },
+    language: "zh",
+    stats: {
+      wordsRead: 0,
+      wordsKnown: 0,
+      readingsDone: 0,
+      dayStreak: 0,
+    },
+    readingProgress: {},
   };
 }
 
@@ -66,4 +82,31 @@ export function resetOnboarding(): void {
     completedAt: null,
     skippedAt: null,
   });
+}
+
+export function setLanguage(lang: string): void {
+  appState$.language.set(lang);
+}
+
+export function addWordsRead(count: number): void {
+  const current = appState$.stats.wordsRead.get();
+  appState$.stats.wordsRead.set(current + count);
+}
+
+export function addWordsKnown(count: number): void {
+  const current = appState$.stats.wordsKnown.get();
+  appState$.stats.wordsKnown.set(current + count);
+}
+
+export function incrementReadingsDone(): void {
+  const current = appState$.stats.readingsDone.get();
+  appState$.stats.readingsDone.set(current + 1);
+}
+
+export function setReadingProgress(
+  articleId: string,
+  currentPage: number,
+  totalPages: number,
+): void {
+  appState$.readingProgress[articleId].set({ currentPage, totalPages });
 }
