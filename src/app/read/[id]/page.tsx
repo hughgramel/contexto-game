@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useCallback } from "react";
+import { use, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { observer } from "@legendapp/state/react";
 
@@ -12,6 +12,7 @@ import {
   incrementReadingsDone,
 } from "@/lib/state/app-state";
 import { getArticleById } from "@/lib/mock-data";
+import { SlotCounter } from "@/components/slot-counter";
 
 type ReaderPageProps = {
   params: Promise<{ id: string }>;
@@ -29,32 +30,60 @@ const ReaderPage = observer(function ReaderPage({ params }: ReaderPageProps) {
   const totalPages = article?.pages.length ?? 1;
   const pct = Math.round(((currentPage + 1) / totalPages) * 100);
 
-  const goToPage = useCallback(
-    (page: number) => {
-      if (!article) return;
-      setReadingProgress(id, page, totalPages);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const pageRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const visitedPages = useRef(new Set<number>([0]));
 
-      const wordsPerPage = Math.round(article.wordsCount / totalPages);
-      addWordsRead(wordsPerPage);
-      addWordsKnown(Math.round(wordsPerPage * 0.3));
-    },
-    [id, article, totalPages],
-  );
-
-  const nextPage = useCallback(() => {
-    if (currentPage < totalPages - 1) {
-      goToPage(currentPage + 1);
-    } else {
-      incrementReadingsDone();
-      router.push("/home");
+  // Scroll to saved page on mount (instant, no animation)
+  useEffect(() => {
+    const savedPage = currentPage;
+    if (savedPage > 0 && pageRefs.current[savedPage]) {
+      pageRefs.current[savedPage]?.scrollIntoView();
     }
-  }, [currentPage, totalPages, goToPage, router]);
-
-  const prevPage = useCallback(() => {
-    if (currentPage > 0) {
-      setReadingProgress(id, currentPage - 1, totalPages);
+    // Mark all pages up to saved as visited
+    for (let i = 0; i <= savedPage; i++) {
+      visitedPages.current.add(i);
     }
-  }, [currentPage, id, totalPages]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // IntersectionObserver to detect which page is snapped into view
+  useEffect(() => {
+    if (!article) return;
+    const container = scrollRef.current;
+    if (!container) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          const pageIndex = Number(entry.target.getAttribute("data-page"));
+          if (isNaN(pageIndex)) continue;
+
+          setReadingProgress(id, pageIndex, totalPages);
+
+          if (!visitedPages.current.has(pageIndex)) {
+            visitedPages.current.add(pageIndex);
+            const wordsPerPage = Math.round(article.wordsCount / totalPages);
+            addWordsRead(wordsPerPage);
+            addWordsKnown(Math.round(wordsPerPage * 0.3));
+          }
+        }
+      },
+      { root: container, threshold: 0.4 },
+    );
+
+    pageRefs.current.forEach((el) => {
+      if (el) observer.observe(el);
+    });
+
+    return () => observer.disconnect();
+  }, [id, article, totalPages]);
+
+  const handleFinish = useCallback(() => {
+    incrementReadingsDone();
+    router.push(`/read/${id}/complete`);
+  }, [router, id]);
 
   if (!article) {
     return (
@@ -65,8 +94,9 @@ const ReaderPage = observer(function ReaderPage({ params }: ReaderPageProps) {
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <div className="border-b border-black/10 px-4 py-3">
+    <div className="flex h-[100dvh] flex-col bg-white">
+      {/* Sticky header: progress bar + stats */}
+      <div className="shrink-0 border-b border-black/10 px-4 py-3">
         <div className="flex items-center gap-3">
           <button
             onClick={() => router.push("/home")}
@@ -79,9 +109,9 @@ const ReaderPage = observer(function ReaderPage({ params }: ReaderPageProps) {
           </button>
 
           <div className="flex-1">
-            <div className="h-2 bg-black/10">
+            <div className="h-2 rounded-full bg-black/10 overflow-hidden">
               <div
-                className="h-2 bg-black transition-all duration-300"
+                className="h-2 rounded-full bg-black transition-all duration-500 ease-out"
                 style={{ width: `${pct}%` }}
               />
             </div>
@@ -92,47 +122,57 @@ const ReaderPage = observer(function ReaderPage({ params }: ReaderPageProps) {
           </span>
         </div>
 
-        <div className="mt-2 flex items-center gap-4 text-xs">
-          <div className="flex items-center gap-1.5">
-            <span className="text-black/40">Read</span>
-            <span className="font-mono font-bold">{stats.wordsRead}</span>
-          </div>
+        {/* Stats row with slot-machine counters */}
+        <div className="mt-2 flex items-center gap-4">
+          <SlotCounter value={stats.wordsRead} label="Read" />
           <div className="h-3 w-px bg-black/10" />
-          <div className="flex items-center gap-1.5">
-            <span className="text-black/40">Known</span>
-            <span className="font-mono font-bold">{stats.wordsKnown}</span>
-          </div>
+          <SlotCounter value={stats.wordsKnown} label="Known" />
         </div>
       </div>
 
-      <div className="flex flex-1 flex-col px-4 py-6">
-        {currentPage === 0 && (
-          <div className="mb-6">
-            <h1 className="text-2xl font-bold">{article.title}</h1>
-            <p className="mt-2 text-sm text-black/50">{article.subtitle}</p>
-          </div>
-        )}
-
-        <p className="flex-1 text-base leading-7 text-black/70">
-          {article.pages[currentPage]}
-        </p>
-
-        <div className="mt-8 flex gap-3">
-          {currentPage > 0 && (
-            <button
-              onClick={prevPage}
-              className="flex-1 border border-black/10 py-3 text-sm font-medium"
-            >
-              Previous
-            </button>
-          )}
-          <button
-            onClick={nextPage}
-            className="flex-1 bg-black py-3 text-sm font-semibold text-white"
+      {/* TikTok-style scroll-snap container — all pages pre-rendered */}
+      <div
+        ref={scrollRef}
+        className="hide-scrollbar flex-1 min-h-0 overflow-y-scroll snap-y snap-mandatory overscroll-y-contain"
+      >
+        {article.pages.map((pageText, i) => (
+          <div
+            key={i}
+            ref={(el) => { pageRefs.current[i] = el; }}
+            data-page={i}
+            className="min-h-full snap-start snap-always flex flex-col px-5 py-6 box-border"
           >
-            {currentPage < totalPages - 1 ? "Next Page" : "Finish"}
-          </button>
-        </div>
+            {i === 0 && (
+              <div className="mb-4 shrink-0">
+                <h1 className="text-3xl font-bold leading-tight">{article.title}</h1>
+                <p className="mt-1.5 text-base text-black/50">{article.subtitle}</p>
+              </div>
+            )}
+
+            <p className="flex-1 text-xl leading-8 text-black/70">
+              {pageText}
+            </p>
+
+            {/* Bottom hint / finish */}
+            <div className="mt-auto pt-6 shrink-0">
+              {i < totalPages - 1 ? (
+                <div className="flex flex-col items-center gap-1 text-black/20 pb-2">
+                  <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="18 15 12 9 6 15" />
+                  </svg>
+                  <span className="text-[11px]">Scroll to continue</span>
+                </div>
+              ) : (
+                <button
+                  onClick={handleFinish}
+                  className="w-full bg-black py-3.5 text-sm font-semibold text-white rounded-lg"
+                >
+                  Finish Reading
+                </button>
+              )}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

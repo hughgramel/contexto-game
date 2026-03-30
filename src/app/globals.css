@@ -4,3 +4,59 @@ html,
 body {
   margin: 0;
 }
+
+/* Hide scrollbar for TikTok-style snap scroll */
+.hide-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Completion page — stat smash-in animation */
+@keyframes smash {
+  0% {
+    transform: scale(2.8) translateY(-20px);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(0.92) translateY(2px);
+    opacity: 1;
+  }
+  70% {
+    transform: scale(1.06) translateY(-1px);
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+.smash-in {
+  opacity: 0;
+  animation: smash 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Counter pop — scales up big then bounces back */
+@keyframes counter-pop {
+  0% {
+    transform: scale(1);
+  }
+  20% {
+    transform: scale(1.35);
+  }
+  50% {
+    transform: scale(0.95);
+  }
+  70% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.counter-pop {
+  animation: counter-pop 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
