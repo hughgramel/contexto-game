@@ -12,6 +12,9 @@
   },
   "dependencies": {
     "@legendapp/state": "^2.1.15",
+    "@testing-library/user-event": "^14.6.1",
+    "fake-indexeddb": "^6.2.5",
+    "idb": "^8.0.3",
     "next": "16.2.1",
     "react": "19.2.4",
     "react-dom": "19.2.4"

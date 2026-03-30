@@ -1,86 +1,116 @@
 "use client";
 
-import Link from "next/link";
-import { observer } from "@legendapp/state/react";
+import { startTransition, useEffect, useState } from "react";
+import type { ChangeEvent } from "react";
+import { useSelector } from "@legendapp/state/react";
 
-import { LanguageSwitcher } from "@/components/language-switcher";
-import { StatsBar } from "@/components/stats-bar";
-import { appState$ } from "@/lib/state/app-state";
-import { MOCK_ARTICLES } from "@/lib/mock-data";
+import { LibraryMediaCard } from "@/components/library-media-card";
+import { SafeAreaShell } from "@/components/safe-area-shell";
+import {
+  ensureBundledSampleMedia,
+  importTextMedia,
+} from "@/lib/media/media-service";
+import { getLibraryMedia } from "@/lib/state/library-state";
 
-const HomePage = observer(function HomePage() {
-  const progress = appState$.readingProgress.get();
-  const currentArticle = MOCK_ARTICLES[0];
-  const articleProgress = progress[currentArticle.id];
-  const pct = articleProgress
-    ? Math.round((articleProgress.currentPage / articleProgress.totalPages) * 100)
-    : 0;
+export default function HomePage() {
+  const libraryMedia = useSelector(() => getLibraryMedia());
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+
+  useEffect(() => {
+    void ensureBundledSampleMedia();
+  }, []);
+
+  async function handleUpload(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    setIsUploading(true);
+    setUploadError(null);
+
+    try {
+      await importTextMedia(file);
+      startTransition(() => {
+        setIsUploading(false);
+      });
+    } catch (error) {
+      setIsUploading(false);
+      setUploadError(
+        error instanceof Error ? error.message : "Upload failed.",
+      );
+    } finally {
+      event.target.value = "";
+    }
+  }
 
   return (
-    <section className="flex flex-col">
-      <div className="flex items-center justify-between border-b border-black/10 px-4 py-3">
-        <LanguageSwitcher />
-        <StatsBar />
+    <SafeAreaShell className="px-4 py-6 md:px-6">
+      <div className="flex flex-col gap-6">
+        <header className="space-y-3">
+          <p className="text-xs uppercase tracking-[0.35em] text-emerald-300">Library</p>
+          <h1 className="text-3xl font-semibold text-white">Contexto Library</h1>
+          <p className="text-sm text-slate-300">
+            Open local media, continue where you left off, and import plain-text
+            readers that stay in this browser for now.
+          </p>
+        </header>
+
+        <section className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-slate-900/80 p-4">
+          <div className="flex flex-wrap items-center gap-3">
+            <label
+              htmlFor="upload-input"
+              className="cursor-pointer rounded-full bg-emerald-400 px-4 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-slate-950 transition hover:bg-emerald-500"
+            >
+              {isUploading ? "Uploading..." : "Upload media"}
+            </label>
+            <input
+              id="upload-input"
+              type="file"
+              accept=".txt,text/plain"
+              className="hidden"
+              aria-label="Upload media"
+              onChange={(event) => {
+                void handleUpload(event);
+              }}
+            />
+            <p className="text-xs text-slate-400">
+              Supported now: plain-text files parsed into local paged readers.
+            </p>
+          </div>
+          {uploadError ? (
+            <p className="text-sm text-rose-300">{uploadError}</p>
+          ) : (
+            <p className="text-sm text-slate-300/80">
+              Bundled sample content is always available, and uploads appear in
+              the same library immediately after import.
+            </p>
+          )}
+        </section>
+
+        <section className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-white">Readable media</h2>
+            <p className="text-xs uppercase tracking-[0.4em] text-slate-400">Local first</p>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            {libraryMedia.map((media) => (
+              <LibraryMediaCard
+                key={media.id}
+                continuePageIndex={media.continuePageIndex}
+                mediaId={media.id}
+                progressPercent={media.progressPercent}
+                sourceType={media.sourceType}
+                title={media.title}
+              />
+            ))}
+          </div>
+          {libraryMedia.length === 0 ? (
+            <p className="text-sm text-slate-400">Loading local media…</p>
+          ) : null}
+        </section>
       </div>
-
-      <div className="space-y-6 p-4">
-        <div>
-          <p className="text-xs text-black/40">This week: Mar 30 – Apr 5</p>
-          <h1 className="mt-1 text-xl font-bold">Today</h1>
-        </div>
-
-        <Link
-          href={`/read/${currentArticle.id}`}
-          className="block border border-black/10 p-4"
-        >
-          <div className="mb-3 flex items-center gap-2">
-            <span className="border border-black/10 px-2 py-0.5 text-xs text-black/50">
-              {currentArticle.category}
-            </span>
-            <span className="text-xs text-black/30">{currentArticle.date}</span>
-          </div>
-          <h2 className="text-lg font-bold">{currentArticle.title}</h2>
-          <p className="mt-1 text-sm text-black/50">{currentArticle.subtitle}</p>
-          <div className="mt-4 flex items-center justify-between">
-            <span className="bg-black px-4 py-2 text-sm font-semibold text-white">
-              {pct > 0 ? "Resume" : "Start Reading"}
-            </span>
-            <span className="font-mono text-sm text-black/40">{pct}%</span>
-          </div>
-        </Link>
-
-        <div>
-          <h2 className="mb-3 text-xs font-semibold uppercase tracking-widest text-black/40">
-            Continue Reading
-          </h2>
-          <div className="space-y-2">
-            {MOCK_ARTICLES.slice(1, 4).map((article) => {
-              const ap = progress[article.id];
-              const apPct = ap ? Math.round((ap.currentPage / ap.totalPages) * 100) : 0;
-
-              return (
-                <Link
-                  key={article.id}
-                  href={`/read/${article.id}`}
-                  className="flex items-center justify-between border border-black/10 px-4 py-3"
-                >
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium">{article.title}</p>
-                    <p className="mt-0.5 text-xs text-black/40">
-                      {article.category} · {article.wordsCount} words
-                    </p>
-                  </div>
-                  <span className="ml-3 shrink-0 font-mono text-xs text-black/40">
-                    {apPct}%
-                  </span>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-    </section>
+    </SafeAreaShell>
   );
-});
-
-export default HomePage;
+}
