@@ -1,12 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" fill="none">
-  <!-- Blue outer rounded square -->
-  <rect width="512" height="512" rx="110" fill="#1489E8"/>
-  <!-- White inner rounded rectangle (thicker bottom = 90px) -->
-  <rect x="26" y="26" width="460" height="396" rx="86" fill="#FFFFFF"/>
-  <!-- Bar 1: width 340 -->
-  <rect x="86" y="122" width="340" height="42" rx="21" fill="#1489E8"/>
-  <!-- Bar 2: width 310 -->
-  <rect x="86" y="194" width="310" height="42" rx="21" fill="#1489E8"/>
-  <!-- Bar 3: width 260 -->
-  <rect x="86" y="266" width="260" height="42" rx="21" fill="#1489E8"/>
+  <!-- Black circle -->
+  <circle cx="256" cy="256" r="256" fill="#000000"/>
+  <!-- Bold C letter -->
+  <text x="256" y="320" text-anchor="middle" font-family="Georgia, serif" font-weight="700" font-size="320" fill="#FFFFFF">C</text>
 </svg>

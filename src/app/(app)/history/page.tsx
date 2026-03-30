@@ -19,16 +19,6 @@ const HistoryPage = observer(function HistoryPage() {
 
   return (
     <section className="flex flex-col min-h-[calc(100dvh-80px)]">
-      {/* Header with back button */}
-      <div className="flex items-center gap-3 border-b border-black/10 px-4 py-3">
-        <Link href="/profile" className="text-black/40 hover:text-black transition-colors">
-          <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="15 18 9 12 15 6" />
-          </svg>
-        </Link>
-        <h1 className="text-lg font-bold">Your Reads</h1>
-      </div>
-
       <div className="p-4 space-y-6">
         {/* In progress */}
         {articlesWithProgress.length > 0 && (

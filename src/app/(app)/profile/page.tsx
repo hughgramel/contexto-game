@@ -23,10 +23,6 @@ const ProfilePage = observer(function ProfilePage() {
 
   return (
     <section className="flex flex-col">
-      <div className="border-b border-black/10 px-4 py-4">
-        <h1 className="text-xl font-bold">Profile</h1>
-      </div>
-
       <div className="space-y-6 p-4">
         <div className="flex items-center gap-4">
           <div className="flex h-14 w-14 items-center justify-center border border-black/10 text-lg font-bold">

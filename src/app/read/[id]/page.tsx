@@ -11,10 +11,6 @@ import {
   setReadingProgress,
   incrementReadingsDone,
 } from "@/lib/state/app-state";
-import {
-  knownWordsCount$,
-  learningWordsCount$,
-} from "@/lib/state/dictionary-state";
 import { clearSelection, clearWordTranslation } from "@/lib/state/reader-state";
 import { getArticleById } from "@/lib/mock-data";
 import { tokenizeText } from "@/lib/tokenize";
@@ -38,8 +34,7 @@ const ReaderPage = observer(function ReaderPage({ params }: ReaderPageProps) {
   const totalPages = article?.pages.length ?? 1;
   const pct = totalPages <= 1 ? 100 : Math.round((currentPage / (totalPages - 1)) * 100);
 
-  const knownCount = knownWordsCount$.get();
-  const learningCount = learningWordsCount$.get();
+  const stats = appState$.stats.get();
 
   // Tokenize each page into Word arrays
   const pageWords = useMemo(
@@ -177,9 +172,9 @@ const ReaderPage = observer(function ReaderPage({ params }: ReaderPageProps) {
 
         {/* Stats row with slot-machine counters */}
         <div className="mt-2 flex items-center gap-4">
-          <SlotCounter value={learningCount} label="Learning" />
+          <SlotCounter value={stats.wordsRead} label="Read" />
           <div className="h-3 w-px bg-black/10" />
-          <SlotCounter value={knownCount} label="Known" />
+          <SlotCounter value={stats.wordsKnown} label="Known" />
         </div>
       </div>
 
