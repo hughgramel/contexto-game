@@ -9,18 +9,26 @@ export const OnboardingStatus = observer(function OnboardingStatus() {
   const hasHydrated = appState$.preferences.hasHydrated.get();
 
   return (
-    <dl>
-      <dt>Hydrated</dt>
-      <dd>{hasHydrated ? "yes" : "no"}</dd>
+    <dl className="grid grid-cols-1 gap-3 sm:grid-cols-[10rem_1fr]">
+      <dt className="text-sm font-medium text-slate-500">Hydrated</dt>
+      <dd className="rounded-xl bg-slate-50 px-3 py-2 text-sm text-slate-700">
+        {hasHydrated ? "yes" : "no"}
+      </dd>
 
-      <dt>Completed</dt>
-      <dd>{onboarding.hasCompleted ? "yes" : "no"}</dd>
+      <dt className="text-sm font-medium text-slate-500">Completed</dt>
+      <dd className="rounded-xl bg-slate-50 px-3 py-2 text-sm text-slate-700">
+        {onboarding.hasCompleted ? "yes" : "no"}
+      </dd>
 
-      <dt>Completed at</dt>
-      <dd>{onboarding.completedAt ?? "not set"}</dd>
+      <dt className="text-sm font-medium text-slate-500">Completed at</dt>
+      <dd className="rounded-xl bg-slate-50 px-3 py-2 text-sm text-slate-700">
+        {onboarding.completedAt ?? "not set"}
+      </dd>
 
-      <dt>Skipped at</dt>
-      <dd>{onboarding.skippedAt ?? "not set"}</dd>
+      <dt className="text-sm font-medium text-slate-500">Skipped at</dt>
+      <dd className="rounded-xl bg-slate-50 px-3 py-2 text-sm text-slate-700">
+        {onboarding.skippedAt ?? "not set"}
+      </dd>
     </dl>
   );
 });

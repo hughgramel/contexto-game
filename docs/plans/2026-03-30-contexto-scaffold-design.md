@@ -18,7 +18,6 @@ Approved
   - desktop left sidebar
   - mobile bottom navigation
   - `Home`, `Discover`, and `Profile` routes
-- Prepare the repository for Supabase CLI usage without linking a project yet.
 - Add project-level instructions to bias toward architecture confirmation, tests-first work, and dev-tool verification.
 
 ## Constraints
@@ -71,12 +70,6 @@ Route-first scaffold with a config-driven shell.
 - The app stores onboarding flags locally only.
 - The main app loads immediately even if onboarding is incomplete.
 
-### Supabase
-
-- Initialize local Supabase project scaffolding via Supabase CLI.
-- Do not run `supabase link` yet.
-- Add clear notes for the future link/login step.
-
 ### Testing
 
 - Add a lightweight test runner suitable for state utilities and shell behavior.
@@ -87,7 +80,6 @@ Route-first scaffold with a config-driven shell.
 
 - `AGENTS.md`
 - `docs/plans/2026-03-30-contexto-scaffold-design.md`
-- `supabase/config.toml` and Supabase scaffold files created by CLI
 - `src/app/(app)/layout.tsx`
 - `src/app/(app)/home/page.tsx`
 - `src/app/(app)/discover/page.tsx`
@@ -107,5 +99,29 @@ Route-first scaffold with a config-driven shell.
 - Mobile shows bottom navigation.
 - Onboarding flags persist locally through Legend State persistence.
 - Repository contains explicit project instructions for future work quality.
-- Supabase CLI scaffold exists locally without linking to a remote project.
 - Tests and lint pass.
+
+## UI Refinement
+
+### Status
+
+Approved
+
+### Goal
+
+Make the scaffold look like a reasonable neutral app prototype without introducing a full design system.
+
+### Chosen Direction
+
+- Light gray app background with white content panels
+- Soft borders and rounded corners
+- Clear page headers and grouped content cards
+- Restrained primary and secondary button treatments
+- Sidebar and bottom nav with visible chrome and active state
+
+### Constraints
+
+- Tailwind utilities only
+- No custom animation work
+- No branding pass
+- No expansion into a reusable primitive/component library yet
