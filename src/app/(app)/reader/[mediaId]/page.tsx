@@ -25,7 +25,6 @@ import {
   setSentenceSelection,
 } from "@/lib/state/reader-state";
 import { getWordStatus, setWordLearning } from "@/lib/state/vocabulary-state";
-import { appState$ } from "@/lib/state/app-state";
 
 function getHighlightClass(status: ReturnType<typeof getWordStatus>): string {
   if (status === "known") {
@@ -46,7 +45,6 @@ function sentenceButtonLabel(index: number): string {
 export default function ReaderPage() {
   const params = useParams<{ mediaId: string }>();
   const mediaId = params?.mediaId ?? "";
-  const lang = appState$.language.get();
   const [document, setDocument] = useState<ReaderDocument | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -203,7 +201,7 @@ export default function ReaderPage() {
 
             <div className="flex flex-wrap gap-2 text-base leading-relaxed text-slate-100">
               {activePage.tokens.map((token) => {
-                const status = getWordStatus(lang, token.normalized);
+                const status = getWordStatus(token.normalized);
 
                 return (
                   <button
@@ -243,7 +241,7 @@ export default function ReaderPage() {
             return;
           }
 
-          setWordLearning(lang, modal.normalized, modal.surface);
+          setWordLearning(modal.normalized, modal.surface);
           closeWordModal();
         }}
         onMarkKnown={() => {

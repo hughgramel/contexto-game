@@ -11,12 +11,14 @@ import {
   setWordKnown,
   setWordLearning,
 } from "@/lib/state/vocabulary-state";
+import { setLanguage } from "@/lib/state/app-state";
 
 describe("comprehension analysis", () => {
   it("counts only known words toward comprehension percent", () => {
     resetVocabularyState();
-    setWordKnown("zh", "aurora", "Aurora");
-    setWordLearning("zh", "tower", "Tower");
+    setLanguage("zh");
+    setWordKnown("aurora", "Aurora");
+    setWordLearning("tower", "Tower");
 
     const analysis = analyzeWordCounts(
       {
@@ -36,11 +38,12 @@ describe("comprehension analysis", () => {
 
   it("recomputes whole-media comprehension from the saved frequency map", () => {
     resetVocabularyState();
-    setWordKnown("zh", "tower", "Tower");
-    setWordKnown("zh", "gardens", "gardens");
+    setLanguage("zh");
+    setWordKnown("tower", "Tower");
+    setWordKnown("gardens", "gardens");
 
     const document = createSampleDocument();
-    const analysis = analyzeDocumentComprehension(document, "zh");
+    const analysis = analyzeDocumentComprehension(document);
 
     expect(analysis.totalTokens).toBe(document.totalWordTokens);
     expect(analysis.knownTokens).toBe(

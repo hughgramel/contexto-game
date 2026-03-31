@@ -4,6 +4,7 @@ import { startTransition, useEffect, useState } from "react";
 import type { ChangeEvent } from "react";
 import { useSelector } from "@legendapp/state/react";
 
+import { HomeLanguageDropdown } from "@/components/home-language-dropdown";
 import { LibraryMediaCard } from "@/components/library-media-card";
 import { SafeAreaShell } from "@/components/safe-area-shell";
 import {
@@ -49,7 +50,10 @@ export default function HomePage() {
     <SafeAreaShell className="px-4 py-6 md:px-6">
       <div className="flex flex-col gap-6">
         <header className="space-y-3">
-          <p className="text-xs uppercase tracking-[0.35em] text-emerald-300">Library</p>
+          <div className="flex items-center justify-between">
+            <p className="text-xs uppercase tracking-[0.35em] text-emerald-300">Library</p>
+            <HomeLanguageDropdown />
+          </div>
           <h1 className="text-3xl font-semibold text-white">Contexto Library</h1>
           <p className="text-sm text-slate-300">
             Open local media, continue where you left off, and import plain-text

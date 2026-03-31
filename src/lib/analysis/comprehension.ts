@@ -33,8 +33,7 @@ export function analyzeWordCounts(
 
 export function analyzeDocumentComprehension(
   document: ReaderDocument,
-  lang: string,
-  entries: Record<string, WordEntry> = getVocabularyEntries(lang),
+  entries: Record<string, WordEntry> = getVocabularyEntries(),
 ): ComprehensionAnalysis {
   return analyzeWordCounts(document.frequencyByWord, entries);
 }

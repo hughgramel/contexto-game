@@ -16,7 +16,7 @@ describe("ProfilePage", () => {
   });
 
   it("renders the stats grid and vocabulary snapshot", () => {
-    setWordKnown("zh", "aurora", "Aurora");
+    setWordKnown("aurora", "Aurora");
 
     render(<ProfilePage />);
 
